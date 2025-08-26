@@ -14,15 +14,15 @@
 
 const char* TAG = "SIMPLE BLINKER";
 
-#define LED_PIN 2
 #define TIMES_TO_BLINK 10
 #define BLINK_PERIOD_MS 500
+const gpio_num_t LED_PIN = GPIO_NUM_1; //  IO1/2 == DR1/2
 
 
 void app_main() {
     uint64_t currentTimeMs      = 0;
     uint64_t lastTimeMs         = 0;
-    size_t blinksCounter    = 0;
+    size_t blinksCounter        = 0;
     bool ledState = false;
 
     // Pin setup
@@ -32,19 +32,23 @@ void app_main() {
     esp_log_level_set(TAG, ESP_LOG_DEBUG);
     ESP_LOGI(TAG, "Starting blinking...");
 
+ 
 
     while(true) {
         currentTimeMs = (uint64_t) (esp_timer_get_time() / 1000); // us to ms divider
+        ESP_LOGV(TAG, "Current time: %" PRIu64 " ms", currentTimeMs);
 
         if (currentTimeMs - lastTimeMs >= BLINK_PERIOD_MS) {
             lastTimeMs = currentTimeMs;
             
             if (ledState == false) {
                 ledState = true;            // LED TOGGLING ON
+                gpio_set_level(LED_PIN, ledState);
                 blinksCounter++;
-                ESP_LOGD(TAG, "LED state: %d", ledState);
+                ESP_LOGD(TAG, "LED state: %d, counter: %u", ledState, blinksCounter);
             } else {
                 ledState = false;           // LED TOGGLING OFF
+                gpio_set_level(LED_PIN, ledState);
                 ESP_LOGD(TAG, "LED state: %d", ledState);
             }
 
@@ -52,10 +56,10 @@ void app_main() {
                 break;                      // Blinking done, exit loop
             }
         }
-        esp_task_wdt_reset(NULL); // WatchDog reset
+        vTaskDelay(1); // Calm down the Watch Dog
 
     } // while
 
     ESP_LOGI(TAG, "Blinking done! Blinked %u times...", blinksCounter);
-    
+
 } // main
