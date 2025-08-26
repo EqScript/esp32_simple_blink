@@ -39,8 +39,11 @@ void app_main() {
         ESP_LOGV(TAG, "Current time: %" PRIu64 " ms", currentTimeMs);
 
         if (currentTimeMs - lastTimeMs >= BLINK_PERIOD_MS) {
+            // Ok, it's time to blink
+
+            // Updating last time we blinked
             lastTimeMs = currentTimeMs;
-            
+
             if (ledState == false) {
                 ledState = true;            // LED TOGGLING ON
                 gpio_set_level(LED_PIN, ledState);
@@ -56,7 +59,7 @@ void app_main() {
                 break;                      // Blinking done, exit loop
             }
         }
-        vTaskDelay(1); // Calm down the Watch Dog
+        vTaskDelay(1); // Feeding the Watch Dog
 
     } // while
 
